@@ -1,12 +1,18 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
-import psycopg2
-from psycopg2.extras import RealDictCursor
-import time
 from .config import settings
 
-# Cadena de conexión usando psycopg2
-SQLALCHEMY_DATABASE_URL =  f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}"
+# 1. Intentamos obtener la URL completa (la que provee Render)
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
+
+# 2. Si no existe DATABASE_URL, armamos la URL usando settings (tu entorno local)
+if not SQLALCHEMY_DATABASE_URL:
+    SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}"
+
+# 3. Solución al prefijo: Render entrega 'postgres://', pero SQLAlchemy requiere 'postgresql://'
+if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 # Crear el motor de la base de datos
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
@@ -14,7 +20,7 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL)
 # Crear la fábrica de sesiones
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Clase base para la creación de los modelos (tablas)
+# Clase base para la creación de los modelos
 Base = declarative_base()
 
 def get_db():
@@ -23,16 +29,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
-# while True:
-
-#     try:
-#         conn = psycopg2.connect(host = 'localhost', database = 'fastapi', user = 'postgres', password = 'postgres123', cursor_factory= RealDictCursor)
-#         cursor = conn.cursor()
-#         print("Database connection was succesfull!")
-#         break
-#     except Exception as error:
-#         print("Connecting to database Failed")
-#         print("Error: ", error)
-#         time.sleep(2)
