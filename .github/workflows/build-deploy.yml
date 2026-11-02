@@ -13,6 +13,6 @@ jobs:
         runs-on: ubuntu-Latest
         steps:
             - name: Pulling Git Repo
-                uses: actions/checkout@v4
+            uses: actions/checkout@v4
             - name: say hi to me
-                run: echo "Hello, I am Black Angel"
+            run: echo "Hello, I am Black Angel"
