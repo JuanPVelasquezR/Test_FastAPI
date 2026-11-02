@@ -1,0 +1,18 @@
+name: Build and Deploy Code
+
+on: 
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+             - main
+
+jobs:
+    job1:
+        runs-on: ubuntu-Latest
+        steps:
+            - name: Pulling Git Repo
+                uses: actions/checkout@v4
+            - name: say hi to me
+                run: echo "Hello, I am Black Angel"
